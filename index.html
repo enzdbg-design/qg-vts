@@ -122,13 +122,29 @@ html.nuit{background:#0c1b44}
 #fiche .btns button{border:0;border-radius:11px;padding:13px;font:700 14px Mont;cursor:pointer}
 #fiche .b1{background:#0a1838;color:#fff}#fiche .b1:hover{background:#1a2c5c}
 #fiche .b2{background:#eef1f7;color:#0a1838}#fiche .b2:hover{background:#dfe6f5}
-.nav span{cursor:default}
+.nav button,.nav a{border:0;background:none;font:13px Mont;padding:7px 11px;border-radius:9px;color:#5b6584;white-space:nowrap;cursor:pointer;text-decoration:none}
+.nav button:hover,.nav a:hover{background:#eef1f7;color:#0a1838}.nav button.on{background:var(--navy);color:#fff}
+.nav em{font-style:normal;font-size:10px;background:#ffe1e3;color:var(--red);padding:1px 5px;border-radius:6px;margin-left:5px}
+.nav .logo{cursor:pointer}
+.ev b.lk{cursor:pointer;text-decoration:underline;text-decoration-color:#cfd6ea;text-underline-offset:2px}.ev b.lk:hover{color:var(--red)}
+.mission .av{cursor:pointer}
+#liste{position:absolute;right:76px;top:110px;width:380px;max-height:770px;overflow:auto;padding:20px 18px 16px;flex-direction:column;align-items:stretch;gap:10px;display:none;z-index:6;scrollbar-width:thin}
+#liste.show{display:flex;animation:in .25s}
+#liste .x{position:absolute;right:12px;top:10px;border:0;background:none;font-size:22px;cursor:pointer;color:#8a93ab}
+#liste h2{font:700 26px Mont}#liste .sub{font-size:14px;color:#8a93ab;margin-top:-6px}
+#liste h4{font:700 11px Mont;letter-spacing:.08em;margin:8px 0 2px;display:flex;align-items:center;gap:7px;cursor:pointer}
+#liste h4 i{width:10px;height:10px;border-radius:3px;display:inline-block}
+#liste .row{display:flex;align-items:center;gap:10px;border:0;background:none;width:100%;text-align:left;padding:5px 6px;border-radius:9px;cursor:pointer;font:13.5px Mont;color:#0a1838}
+#liste .row:hover{background:#f1f4fa}#liste .row canvas{position:static;width:30px;height:30px;border-radius:50%;image-rendering:pixelated;flex:none}
+#liste .row small{display:block;font-size:12px;color:#8a93ab}#liste .row .dot{margin-left:auto;font-size:11px;color:#0f7a3a;white-space:nowrap}#liste .row .dot.mv{color:#a25a00}#liste .row .dot.rv{color:#0b7373}
+#liste p{font-size:14.5px;line-height:1.45}#liste .cards{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+#liste .cards a{display:block;background:#f1f4fa;border-radius:10px;padding:10px;text-decoration:none;color:#0a1838;font-size:13px;line-height:1.35}#liste .cards a:hover{background:#e6ecf7}#liste .cards a b{display:block;font-size:14px;margin-bottom:2px}
 </style>
 </head><body>
 <canvas id="lo" width="800" height="490"></canvas>
 <canvas id="c" width="1920" height="1080"></canvas>
 
-<div class="chip nav"><div class="logo"><img src="logo-blanc.png"><b>QG</b></div><span class="on">Open space</span><span>Équipe<em>32</em></span><span>Pôles<em>9</em></span><span>Inscriptions<em>18</em></span></div>
+<div class="chip nav"><div class="logo" id="home" title="Vue d'ensemble"><img src="logo-blanc.png"><b>QG</b></div><button class="on" id="nvue" title="Revenir à la vue d'ensemble">Open space</button><button id="nteam" title="Voir les 32 agents">Équipe<em>32</em></button><button id="nbrain" title="Ce que partagent tous les agents">Cerveau</button><a id="nins" href="https://claude.ai/artifact/CzcRGvsPMh9eSrui25NGzR" target="_blank" rel="noopener" title="Ouvrir le bulletin d'inscription">Inscriptions ↗</a></div>
 <div class="chip tools" id="apps"></div>
 <div class="chip" id="tp"><button class="x" id="tpx">×</button><div class="hd"><div class="lg" id="tpl"></div><div><h2 id="tpn"></h2><div class="st" id="tps"></div></div></div><div><h4>À QUOI IL SERT AU QG</h4><p id="tpj"></p></div><div><h4>UTILISÉ PAR</h4><div class="who" id="tpw"></div></div><a class="open" id="tpo" target="_blank" rel="noopener"></a></div>
 <div class="chip stat"><input id="q" placeholder="Chercher un agent…" autocomplete="off"><i></i><b id="nb">30</b> au poste<button id="dn" title="Jour / nuit"></button></div>
@@ -158,6 +174,7 @@ html.nuit{background:#0c1b44}
   <div><h4 id="feh">SON ÉQUIPE</h4><div class="team" id="fe"></div></div>
   <div class="btns"><button class="b1" id="fm1">Lui confier une mission</button><button class="b2" id="fm2">Voir le pôle</button></div>
 </div>
+<div class="chip" id="liste"><button class="x" id="lx">×</button><div id="lc"></div></div>
 <div class="hint">Clique sur un agent pour voir sa fiche · glisse pour te déplacer · molette pour zoomer</div>
 <div class="chip plan"><h3>PLAN DU BUREAU · CLIQUE POUR Y ALLER</h3><div class="grid" id="pg"></div></div>
 <script>
@@ -576,7 +593,7 @@ add(GW+.8+15.5+.5,()=>{const x=GW+.35,y=15.6;box(x,y,.05,.7,1.5,.28,'#2459e0',{t
 [[GW+.5,4.2],[GW+.5,5.0],[11,GD+.5],[12,GD+.5]].forEach(([x,y])=>add(x+y+.3,()=>{const[a,b]=P(x,y);for(let j=0;j<7;j++)for(let i=-(j>>1);i<=(j>>1);i++)put(a+i,b-7+j,j==3||j==4?'#ffffff':'#ff7a1a');rect(a-4,b,9,1,'#c4520e')}));
 
 // ---------- les 32 agents prennent place ----------
-PEOPLE.forEach(p=>{const z=ZB[p.p];const o={...p.o};delete o.place;
+PEOPLE.forEach(p=>{const z=ZB[p.p];p.z=z;const o={...p.o};delete o.place;
   if(p.o.place==='meet'){if(p.id==='julie')o.point=1;else o.sitF=1}
   else if(p.o.place==='booth'){o.sitF=1;o.k=p.seat[0]+p.seat[1]+1.6}
   else if(p.slot.f)o.sitF=1;else o.sit=1;
@@ -688,7 +705,7 @@ const logoOf=n=>n==='Bulletin'?'<img src="logo-blanc.png">':n==='CapCut'?MONO('C
 const ap=document.getElementById('apps');ap.innerHTML=APPS.map(([n])=>`<div class="app" data-n="${n}"><div class="ic${n==='Bulletin'?' vts':''}">${logoOf(n)}</div><b>${n}</b><small>veille</small></div>`).join('');
 const jr=document.getElementById('jr');let lastA=-1;
 const hh=()=>{const d=new Date();return String(d.getHours()).padStart(2,'0')+':'+String(d.getMinutes()).padStart(2,'0')};
-function pushEv(html){const d=document.createElement('div');d.className='ev';d.innerHTML=`<time>${hh()}</time>${html}`;jr.prepend(d);while(jr.children.length>3)jr.lastChild.remove()}
+function pushEv(html){html=html.replace(/<b>([^<]+)<\/b>/g,(m,n)=>{const q=typeof PEOPLE!=='undefined'&&byName(n);return q?`<b class="lk" data-id="${q.id}">${n}</b>`:m});const d=document.createElement('div');d.className='ev';d.innerHTML=`<time>${hh()}</time>${html}`;jr.prepend(d);while(jr.children.length>3)jr.lastChild.remove()}
 pushEv('<b>Emma</b> reçoit le bulletin n°18 et le virement de 90 €');pushEv('<b>Julie</b> présente le plan de com J-30');
 function tickHUD(t){const s=Math.floor(t/2.5);if(s!==lastA){lastA=s;[...ap.children].forEach((el,k)=>{const on=((k*7+s*3)%10)<5||k===0;el.classList.toggle('on',on);const L=APPS[k][1];const who=L.length?L[(s+k)%L.length]:'';el.querySelector('small').textContent=on&&who?who:'veille'})}
   document.getElementById('nb').textContent=PEOPLE.filter(p=>!p.o.place&&!(p.a.route&&(p.a.seg!==0||p.a.moving))).length}
@@ -740,6 +757,26 @@ function updStatus(){if(!fiche.classList.contains('show'))return;if(FMODE==='a')
     $('ft').innerHTML=M.map(m=>`<li><b>${m.n}</b> · ${statusOf(m)[1]}</li>`).join('')}}
 setInterval(updStatus,1000);
 $('fx').onclick=()=>{fiche.classList.remove('show');SEL=null;FMODE=null};
+// ---------- panneau liste : équipe / cerveau ----------
+const liste=$('liste'),lc=$('lc');
+function closeAll(){fiche.classList.remove('show');liste.classList.remove('show');SEL=null;FMODE=null}
+$('lx').onclick=()=>liste.classList.remove('show');
+new MutationObserver(()=>{if(fiche.classList.contains('show'))liste.classList.remove('show')}).observe(fiche,{attributes:true,attributeFilter:['class']});
+function showListe(html){fiche.classList.remove('show');SEL=null;FMODE=null;lc.innerHTML=html;liste.classList.add('show');liste.scrollTop=0;
+  lc.querySelectorAll('canvas[data-id]').forEach(cv=>drawAv(cv,PB[cv.dataset.id],0))}
+function openTeam(){const grp=Object.keys(PO).map(id=>{const M=memOf(id).sort((a,b)=>b.ch-a.ch);
+  return `<h4 data-z="${id}" style="color:${PO[id].c}"><i style="background:${PO[id].c}"></i>${PO[id].n.toUpperCase()} · ${M.length}</h4>`+M.map(m=>{const[k,t]=statusOf(m);return `<button class="row" data-id="${m.id}"><canvas width="14" height="14" data-id="${m.id}"></canvas><span>${m.ch?'★ ':''}<b>${m.n}</b><small>${m.role}</small></span><span class="dot ${k}">● ${t.split(' · ')[0]}</span></button>`}).join('')}).join('');
+  showListe(`<h2>L'équipe</h2><div class="sub">32 agents · 9 pôles · clique sur un agent pour sa fiche, sur un pôle pour y aller</div>${grp}`)}
+function openBrain(){showListe(`<h2>Cerveau VTS</h2><div class="sub">La mémoire commune, lue par les 32 agents</div>
+  <p>Avant chaque tâche, un agent y lit ce qui fait VTS ; après, il y range ce qu'il a produit. C'est ce qui garde le ton et les visuels cohérents d'un pôle à l'autre.</p>
+  <h4 style="color:#8a93ab;cursor:default">CE QU'IL CONTIENT · OUVRE LA SOURCE</h4>
+  <div class="cards"><a href="https://drive.google.com" target="_blank" rel="noopener"><b>Rushs & photos ↗</b>Classés par sortie, sur Drive</a><a href="https://claude.ai/artifact/CzcRGvsPMh9eSrui25NGzR" target="_blank" rel="noopener"><b>Inscrits ↗</b>Bulletins, virements, décharges</a><a href="https://www.notion.so" target="_blank" rel="noopener"><b>Calendrier ↗</b>Track Day 3/10/2027, mai 2027 à confirmer</a><a href="https://www.canva.com" target="_blank" rel="noopener"><b>Charte VTS ↗</b>Logo, couleurs, polices, affiches</a></div>
+  <h4 style="color:#8a93ab;cursor:default">QUI L'ENRICHIT LE PLUS</h4>`+['ines','tom','emma','lea'].map(id=>{const m=PB[id];return `<button class="row" data-id="${id}"><canvas width="14" height="14" data-id="${id}"></canvas><span><b>${m.n}</b><small>${m.role}</small></span></button>`}).join(''));focusArt(...P(17.3,8.9,.5),3)}
+lc.addEventListener('click',e=>{const r=e.target.closest('[data-id]');if(r&&r.tagName!=='CANVAS'){openFiche(PB[r.dataset.id],1);return}if(r){openFiche(PB[r.dataset.id],1);return}const h=e.target.closest('h4[data-z]');if(h)openPole(h.dataset.z)});
+$('nvue').onclick=$('home').onclick=()=>{closeAll();closeTool();CT.z=2;clampT()};
+$('nteam').onclick=openTeam;$('nb').parentElement.querySelector('i').style.cursor='pointer';[$('nb'),$('nb').nextSibling].forEach(()=>{});$('nb').style.cursor='pointer';$('nb').title='Voir qui est au poste';$('nb').onclick=openTeam;$('nbrain').onclick=openBrain;
+$('jr').addEventListener('click',e=>{const b=e.target.closest('b.lk');if(b)openFiche(PB[b.dataset.id],1)});
+document.querySelector('.mission .av').onclick=()=>openFiche(PB.victor,1);
 $('fm').addEventListener('click',e=>{const id=e.target.dataset.id;if(id)openFiche(PB[id],1)});
 $('fe').addEventListener('click',e=>{const b=e.target.closest('button');if(b)openFiche(PB[b.dataset.id],1)});
 const mi=$('mi');
@@ -765,9 +802,9 @@ let drag=null;
 c.addEventListener('pointerdown',e=>{drag={x:e.clientX,y:e.clientY,cx:CT.x,cy:CT.y,m:false};c.setPointerCapture(e.pointerId)});
 c.addEventListener('pointermove',e=>{if(drag){const k=toBody(e)[2];const dx=(e.clientX-drag.x)/k,dy=(e.clientY-drag.y)/k;if(Math.abs(dx)+Math.abs(dy)>6)drag.m=true;
   if(drag.m){CT.x=drag.cx+dx;CT.y=drag.cy+dy;clampT();CAM.x=CT.x;CAM.y=CT.y;c.classList.add('drag')}}else{HOV=pick(e);c.style.cursor=HOV||pickLabel(e)?'pointer':''}});
-c.addEventListener('pointerup',e=>{if(drag&&!drag.m){const p=pick(e);if(p)openFiche(p);else{const l=pickLabel(e);if(l==='brain'){pushEv('<b>Le cerveau VTS</b> : charte, rushs classés, inscrits et calendrier, partagés par tous les agents')}else if(l)openPole(l)}}drag=null;c.classList.remove('drag')});
+c.addEventListener('pointerup',e=>{if(drag&&!drag.m){const p=pick(e);if(p)openFiche(p);else{const l=pickLabel(e);if(l==='brain'){openBrain()}else if(l)openPole(l)}}drag=null;c.classList.remove('drag')});
 c.addEventListener('wheel',e=>{e.preventDefault();const[X,Y]=toBody(e);zoomTo(CT.z+(e.deltaY<0?1:-1),X,Y)},{passive:false});
-addEventListener('keydown',e=>{if(e.target.tagName==='INPUT')return;if(e.key==='+'||e.key==='=')zoomTo(CT.z+1);if(e.key==='-')zoomTo(CT.z-1);if(e.key==='Escape')$('fx').click()});
+addEventListener('keydown',e=>{if(e.target.tagName==='INPUT')return;if(e.key==='+'||e.key==='=')zoomTo(CT.z+1);if(e.key==='-')zoomTo(CT.z-1);if(e.key==='Escape'){closeAll();closeTool()}});
 let last=performance.now();
 function loop(now){const dt=Math.max(0,Math.min(.1,(now-last)/1000));last=now;T+=dt;FR++;if(OVR&&T-OVR.t0>7)OVR=null;step(dt);frame();stepCam();tickRelay();drawUI();tickHUD(T);requestAnimationFrame(loop)}
 requestAnimationFrame(loop);
